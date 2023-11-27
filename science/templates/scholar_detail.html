@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>学者信息</h3>
+            </div>
+            <div class="panel-body">
+                <h4>基本信息</h4>
+                <div>
+                    <div class="info-line">
+                        <div>姓名：</div>
+                        <div>{{ scholar.name }}</div>
+                    </div>
+                    <div class="info-line">
+                        <div>所属机构：</div>
+                        <div>{{ scholar.organization }}</div>
+                    </div>
+                    <div class="info-line">
+                        <div>研究领域：</div>
+                        <div>
+                            {% for r_item in scholar.li_research %}
+                                <a href="/keyword_detail/{{ r_item.name }}" style="margin: 0 4px">
+                                    {{ r_item.name }}
+                                </a>
+
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                    <div class="info-line">
+                        <div>团队信息：</div>
+                        <div>
+                            <a href="/group_list/{{ scholar.id }}" class="btn btn-primary mini">查看该学者团队信息</a>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h4>可视化</h4>
+                <div style="display: flex;margin-left: 16px">
+                    <div style="flex: 1">
+                        {#可视化#}
+                        {# 研究领域-饼图#}
+                        <h5>研究领域-饼图</h5>
+                        <div id="research_pie"
+                             style="height:400px;"></div>
+                    </div>
+
+                    <div style="flex: 1">
+                        {# 合作团队-柱状图#}
+                        <h5>合作团队-柱状图</h5>
+                        {% if li_author_group.li_x %}
+                            <div id="author_group_link"
+                                 style="height:400px;margin: 0 auto"></div>
+                        {% else %}
+                            <div style="color: grey;line-height: 40px;margin-left: 100px">暂无数据</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .info-line {
+            display: flex;
+            align-items: center;
+            margin: 16px;
+        }
+
+        .info-line > div:first-child {
+            width: 100px;
+            min-width: 100px;
+        }
+
+        .info-line > div:last-child {
+            flex: 1;
+        }
+
+    </style>
+
+
+    <script type="text/javascript">
+        function renderResearchPie() {
+            const research_pie = {{ scholar.li_research|safe }};
+            var myChart = echarts.init(document.getElementById('research_pie'));
+            myChart.setOption({
+                title: {
+                    {#text: '研究领域'#}
+                },
+                tooltip: {trigger: 'item'},
+                series: [
+                    {
+                        name: 'Access From',
+                        {#left: '15%',     // 图形距离左边距离#}
+                        top: '20%',
+                        type: 'pie',
+                        radius: '50%',
+                        data: research_pie,    // 设置 类型数据
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    formatter: '{b} : {c} ({d}%)'
+                                },
+                                labelLine: {show: true}
+                            }
+                        },
+                    }
+                ]
+            });
+            // 饼图支持点击跳转
+            myChart.on('click', function (param) {
+                window.location.href = "/keyword_detail/" + param.name;
+            });
+        }
+
+        function renderAuthorGroupLine() {
+            const li_author_group = {{ li_author_group|safe }};
+            var myChart = echarts.init(document.getElementById('author_group_link'));
+            myChart.setOption({
+                title: {
+                    {#text: '合作团队-学者排名',#}
+                    {#subtitle: '按次数排序'#}
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {type: 'shadow'}
+                },
+                xAxis: {
+                    type: 'value',
+                },
+                yAxis: {
+                    type: 'category',
+                    axisLabel: { //设置x轴的字
+                        show: true,
+                        interval: 0,//使x轴横坐标全部显示
+                    },
+                    data: li_author_group['li_x'],
+                },
+                series: {
+                    data: li_author_group['li_y'],
+                    type: 'bar',
+                    itemStyle: {
+                        normal: {
+                            label: {show: true},
+                            {#color: '#b81d1d'#}
+                        }
+                    },
+                    showBackground: true,
+                    backgroundStyle: {
+                        color: 'rgba(180, 180, 180, 0.2)'
+                    }
+                },
+            });
+        }
+
+        renderResearchPie() // 领域 饼图
+        renderAuthorGroupLine() // 合作伙伴 柱状图
+
+    </script>
+
+{% endblock %}

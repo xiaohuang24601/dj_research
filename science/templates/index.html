@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <h3>文献检索</h3>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="keyword" class="sr-only">key</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" placeholder="领域搜索">
+                        </div>
+                        <button type="submit" class="btn btn-default">查询</button>
+                    </form>
+                    {% if request.GET.keyword %}
+                        <h4>搜索：{{ request.GET.keyword }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="margin-left: 8px">
+                <h5>总共：{{ count_paper }}</h5>
+                <script>
+                    document.write(Pager({
+                        totalCount: {{ count_paper }}, 		// 总条数
+                        pageSize: 10,    			// 每页显示 n条，默认10
+                        buttonSize: 5,   		// 显示按钮个数，默认10
+                        pageParam: 'page',   		// 页面的参数名为'page'，默认为'page'
+                        className: 'pagination', //分页的样式
+                        {#prevButton: '往前',     //上一页按钮#}
+                        {#nextButton: '往后',     //下一页按钮#}
+                        firstButton: '首页',      //第一页按钮
+                        lastButton: '末页',       //最后一页按钮
+
+                    }));
+                </script>
+            </div>
+
+
+            {#        表格#}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>标题</th>
+                    <th>英文标题</th>
+                    <th>项目</th>
+                    <th>期刊</th>
+                    <th>作者</th>
+                    <th>领域</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for paper_item in li_paper %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ paper_item.title }}</td>
+                        <td>{{ paper_item.title_en }}</td>
+                        <td>{{ paper_item.project }}</td>
+                        <td style="min-width: 100px">{{ paper_item.periodical }}</td>
+                        <td style="min-width: 100px">
+                            {% for author_item in paper_item.li_authors.all %}
+                                <a href="/scholar_detail/{{ author_item.id }}"
+                                   style="margin: 0 4px">{{ author_item.name }}</a>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for key_item in paper_item.li_keywords.all %}
+                                <a href="/keyword_detail/{{ key_item.value }}"
+                                   style="margin: 0 4px">{{ key_item.value }}</a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+
+        </div>
+
+    </div>
+{% endblock %}

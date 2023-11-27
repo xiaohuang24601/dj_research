@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>领域信息：{{ keyword_detail.value }}</h3>
+            </div>
+
+            {#卡片统计#}
+            <h4 style="margin-left: 8px">卡片统计</h4>
+            <div style="display: flex;justify-content: space-around;margin: 16px">
+                <div class="panel panel-success" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">领域学者总发文量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ keyword_detail.total_post|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-warning" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">领域学者人均发文量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ keyword_detail.avg_post|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-info" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">领域学者人均被引量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ keyword_detail.avg_referenced_count|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-danger" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">领域学者人均h指数</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ keyword_detail.avg_h_index|floatformat:2 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            {#表格#}
+            <h4 style="margin-left: 8px">优秀团队</h4>
+            <h5 style="margin-left:10px">数量：<span class="badge">{{ keyword_detail.count_author }}</span></h5>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>名字</th>
+                    <th>研究领域</th>
+                    <th>组织</th>
+                    <th>发文量</th>
+                    <th>被引量</th>
+                    <th>h指数</th>
+                    <th>合作次数</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for scholar_item in keyword_detail.li_author %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">{{ scholar_item.name }}</a>
+                        </td>
+                        <td>
+                            {% for research_item in scholar_item.li_research %}
+                                <a href="/keyword_detail/{{ research_item.name }}">
+                                    {{ research_item.name }}
+                                </a>
+                            {% endfor %}
+                        </td>
+                        <td>{{ scholar_item.organization }}</td>
+                        <td>{{ scholar_item.count_paper }}</td>
+                        <td>{{ scholar_item.referenced_count }}</td>
+                        <td>{{ scholar_item.h_index }}</td>
+                        <td>{{ scholar_item.coop_count }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">查看学者信息</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+
+            {# 表格#}
+            <h4 style="margin-left: 8px;margin-top: 40px">相关文献</h4>
+            <h5 style="margin-left:10px">数量：<span class="badge">{{ keyword_detail.count_paper }}</span></h5>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>标题</th>
+                    <th>英文标题</th>
+                    <th>项目</th>
+                    <th>期刊</th>
+                    <th>作者</th>
+                    <th>关键词</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for paper_item in keyword_detail.li_paper %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ paper_item.title }}</td>
+                        <td>{{ paper_item.title_en }}</td>
+                        <td>{{ paper_item.project }}</td>
+                        <td style="min-width: 100px">{{ paper_item.periodical }}</td>
+                        <td style="min-width: 100px">
+                            {% for author_item in paper_item.li_authors.all %}
+                                <a href="/scholar_detail/{{ author_item.id }}"
+                                   style="margin: 0 4px">{{ author_item.name }}</a>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for key_item in paper_item.li_keywords.all %}
+                                <a href="/keyword_detail/{{ key_item.value }}"
+                                   style="margin: 0 4px">{{ key_item.value }}</a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>
+                    <a href="/scholar_detail/{{ now_author.id }}">{{ now_author.name }}</a>
+                    的团队信息
+                </h3>
+            </div>
+
+            {# 卡片统计#}
+            <h4 style="margin-left: 8px">卡片统计</h4>
+            <div style="display: flex;justify-content: space-between;margin: 16px">
+                <div class="panel panel-success" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">团队总发文量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ total_count_post }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-warning" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">团队人均发文量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ avg_count_post|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-info" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">团队人均h指数</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ avg_count_h_index|floatformat:2 }}</strong>
+                    </div>
+                </div>
+
+                <div class="panel panel-danger" style="width: 200px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">团队人均被引量</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>{{ avg_count_referenced |floatformat:2 }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            {#        可视化#}
+            <h4 style="margin-left: 8px">可视化</h4>
+            <div style="display: flex;margin: 16px">
+                {#                词云图#}
+                <div style="flex: 1">
+                    <h5>团队-词云图</h5>
+                    <div id="word_cloud"
+                         style="height:400px">
+                    </div>
+                </div>
+
+                <div style="flex: 1">
+                    <h5>团队领域研究-饼图</h5>
+                    {#                饼图#}
+                    <div id="all_research_pie"
+                         style="flex: 1;height: 400px;">
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin-left: 8px">团队信息</h4>
+            <h5 style="margin-left:10px">数量：<span class="badge">{{ count }}</span></h5>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>名字</th>
+                    <th>研究领域</th>
+                    <th>组织</th>
+                    <th>发文量</th>
+                    <th>被引量</th>
+                    <th>h指数</th>
+                    <th>合作次数</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for scholar_item in list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">{{ scholar_item.name }}</a>
+                        </td>
+                        <td>
+                            {% for research_item in scholar_item.li_research %}
+                                <a href="/keyword_detail/{{ research_item.name }}">
+                                    {{ research_item.name }}
+                                </a>
+                            {% endfor %}
+                        </td>
+                        <td>{{ scholar_item.organization }}</td>
+                        <td>{{ scholar_item.count_paper }}</td>
+                        <td>{{ scholar_item.referenced_count }}</td>
+                        <td>{{ scholar_item.h_index }}</td>
+                        <td>{{ scholar_item.coop_count }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">查看学者信息</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        function renderWordCloud() {
+            const word_cloud = {{ word_cloud |safe }};
+
+            // 基于准备好的dom，初始化echarts实例（echarts 需要更新到 5.0.1+ 的版本）
+            var chart = echarts.init(document.getElementById('word_cloud'));
+
+            chart.setOption({
+                title: {
+                    {#text: '团队词云图'#}
+                },
+                series: [{
+                    type: 'wordCloud',
+                    data: word_cloud,
+                    {#shape: 'diamond',   // 词云的形状，默认是 circle(圆形)，可选的参数有cardioid（心形） 、 diamond（菱形 正方形） 、 triangle-forward 、 triangle（三角形）、 star（星形）、pentagon （五边形）；#}
+                    gridSize: 1,    // 密集程度 数字越小越密集
+                    sizeRange: [12, 100],
+                    rotationRange: [-90, 90],
+                    rotationStep: 45,
+                    {#maskImage: img, // 图片形状#}
+                    {#shape: 'pentagon',#}
+                    width: 450,
+                    height: 350,
+                    drawOutOfBound: false,
+                    textStyle: {
+                        color: function () {
+                            return 'rgb(' + [
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160)
+                            ].join(',') + ')';
+                        }
+                    },
+                    emphasis: {
+                        textStyle: {
+                            shadowBlur: 10,
+                            shadowColor: '#333'
+                        }
+                    },
+                }]
+            });
+        }
+
+        function renderAllResearchPie() {
+            const all_research_pie = {{ all_research_pie|safe }};
+            var myChart = echarts.init(document.getElementById('all_research_pie'));
+            myChart.setOption({
+                title: {
+                    {#text: '团队研究领域'#}
+                },
+                tooltip: {trigger: 'item'},
+                series: [
+                    {
+                        name: 'Access From',
+                        left: '15%',     // 图形距离左边距离
+                        type: 'pie',
+                        radius: '50%',
+                        data: all_research_pie,    // 设置 类型数据
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true,
+                                    formatter: '{b} : {c} ({d}%)'
+                                },
+                                labelLine: {show: true}
+                            }
+                        },
+                    }
+                ]
+            });
+            // 饼图支持点击跳转
+            myChart.on('click', function (param) {
+                window.location.href = "/keyword_detail/" + param.name;
+            });
+        }
+
+        renderWordCloud()   // 渲染词云图
+        renderAllResearchPie()  // 渲染饼图
+    </script>
+{% endblock %}

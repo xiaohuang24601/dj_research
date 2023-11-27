@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <h3>学者检索</h3>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="keyword" class="sr-only">key</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword"
+                                   placeholder="搜索 学者或者领域">
+                        </div>
+                        <button type="submit" class="btn btn-default">查询</button>
+                    </form>
+                    {% if request.GET.keyword %}
+                        <h4>搜索内容：{{ request.GET.keyword }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div style="margin-left: 8px">
+                <h5>总共：{{ count_scholar }}</h5>
+                <script>
+                    document.write(Pager({
+                        totalCount: {{ count_scholar }}, 		// 总条数
+                        pageSize: 10,    			// 每页显示 n条，默认10
+                        buttonSize: 5,   		// 显示按钮个数，默认10
+                        pageParam: 'page',   		// 页面的参数名为'page'，默认为'page'
+                        className: 'pagination', //分页的样式
+                        {#prevButton: '往前',     //上一页按钮#}
+                        {#nextButton: '往后',     //下一页按钮#}
+                        firstButton: '首页',      //第一页按钮
+                        lastButton: '末页',       //最后一页按钮
+
+                    }));
+                </script>
+            </div>
+
+            <!-- Table -->
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>名字</th>
+                    <th>研究领域</th>
+                    <th>组织</th>
+                    <th>发文量</th>
+                    <th>h指数</th>
+                    <th>被引量</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for scholar_item in li_scholar %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">{{ scholar_item.name }}</a>
+                        </td>
+                        <td>
+                            {% for research_item in scholar_item.li_research %}
+                                <a href="/keyword_detail/{{ research_item.name }}">
+                                    {{ research_item.name }}
+                                </a>
+                            {% endfor %}
+                        </td>
+                        <td>{{ scholar_item.organization }}</td>
+                        <td>{{ scholar_item.count_paper }}</td>
+                        <td>{{ scholar_item.h_index }}</td>
+                        <td>{{ scholar_item.referenced_count }}</td>
+                        <td>
+                            <a href="/scholar_detail/{{ scholar_item.id }}">查看该学者</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+{% endblock %}

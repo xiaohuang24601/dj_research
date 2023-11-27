@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <h3>领域检索</h3>
+            </div>
+            <div class="panel-body">
+                <div>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="keyword" class="sr-only">key</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" placeholder="领域搜索">
+                        </div>
+                        <button type="submit" class="btn btn-default">查询</button>
+                    </form>
+                    {% if request.GET.keyword %}
+                        <h4>搜索领域：{{ request.GET.keyword }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="margin-left: 8px">
+                <h5>总共：{{ count_keywords }}</h5>
+                <script>
+                    document.write(Pager({
+                        totalCount: {{ count_keywords }}, 		// 总条数
+                        pageSize: 10,    			// 每页显示 n条，默认10
+                        buttonSize: 5,   		// 显示按钮个数，默认10
+                        pageParam: 'page',   		// 页面的参数名为'page'，默认为'page'
+                        className: 'pagination', //分页的样式
+                        {#prevButton: '往前',     //上一页按钮#}
+                        {#nextButton: '往后',     //下一页按钮#}
+                        firstButton: '首页',      //第一页按钮
+                        lastButton: '末页',       //最后一页按钮
+
+                    }));
+                </script>
+            </div>
+
+            <!-- Table -->
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>领域</th>
+                    <th>论文数</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for keyword_item in li_keywords %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="/keyword_detail/{{ keyword_item.value }}">{{ keyword_item.value }}</a>
+                        </td>
+                        <td>{{ keyword_item.count_paper }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock %}
